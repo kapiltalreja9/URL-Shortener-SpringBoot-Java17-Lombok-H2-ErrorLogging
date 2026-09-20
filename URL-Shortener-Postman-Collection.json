@@ -1,0 +1,101 @@
+{
+  "info": {
+    "_postman_id": "b2f8b3c9-5c3a-4c12-a8bb-url-shortener",
+    "name": "URL Shortener - Spring Boot Java 17",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Create URL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"longUrl\":\"https://example.com\"}"
+        },
+        "url": "{{baseUrl}}/api/v1/urls"
+      }
+    },
+    {
+      "name": "Create URL with Expiration",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"longUrl\":\"https://example.com/docs\",\"expiresAt\":\"2027-01-01T00:00:00Z\"}"
+        },
+        "url": "{{baseUrl}}/api/v1/urls"
+      }
+    },
+    {
+      "name": "Redirect",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/{{shortCode}}"
+      }
+    },
+    {
+      "name": "Analytics",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/urls/{{shortCode}}/analytics"
+      }
+    },
+    {
+      "name": "Delete",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/v1/urls/{{shortCode}}"
+      }
+    },
+    {
+      "name": "Invalid URL",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"longUrl\":\"ftp://example.com/file\"}"
+        },
+        "url": "{{baseUrl}}/api/v1/urls"
+      }
+    },
+    {
+      "name": "Unknown Short Code",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/does-not-exist"
+      }
+    },
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/actuator/health"
+      }
+    }
+  ]
+}

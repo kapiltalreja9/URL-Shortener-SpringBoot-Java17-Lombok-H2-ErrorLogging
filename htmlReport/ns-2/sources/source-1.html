@@ -1,0 +1,240 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > UrlController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.example.urlshortener.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: UrlController (com.example.urlshortener.controller)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">UrlController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    25%
+  </span>
+  <span class="absValue">
+    (1/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (31/31)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.example.urlshortener.controller;
+&nbsp;
+&nbsp;import com.example.urlshortener.dto.AnalyticsResponse;
+&nbsp;import com.example.urlshortener.dto.CreateUrlRequest;
+&nbsp;import com.example.urlshortener.dto.CreateUrlResponse;
+&nbsp;import com.example.urlshortener.entity.UrlMapping;
+&nbsp;import com.example.urlshortener.service.UrlShortenerService;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;import org.springframework.web.servlet.view.RedirectView;
+&nbsp;
+&nbsp;@RestController
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class UrlController {
+&nbsp;
+&nbsp;    private final UrlShortenerService service;
+&nbsp;
+&nbsp;    @PostMapping(&quot;/api/v1/urls&quot;)
+&nbsp;    public ResponseEntity&lt;CreateUrlResponse&gt; create(
+&nbsp;            @Valid @RequestBody CreateUrlRequest request,
+&nbsp;            HttpServletRequest httpRequest) {
+&nbsp;
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;Create URL request received longUrl={}&quot;, request.getLongUrl());</b>
+&nbsp;
+<b class="fc">&nbsp;            String baseUrl = httpRequest.getScheme() + &quot;://&quot; +</b>
+<b class="fc">&nbsp;                    httpRequest.getServerName() +</b>
+<b class="pc">&nbsp;                    (httpRequest.getServerPort() == 80 || httpRequest.getServerPort() == 443</b>
+<b class="fc">&nbsp;                            ? &quot;&quot;</b>
+<b class="fc">&nbsp;                            : &quot;:&quot; + httpRequest.getServerPort());</b>
+&nbsp;
+<b class="fc">&nbsp;            CreateUrlResponse response = service.create(request, baseUrl);</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(&quot;Create URL request completed shortCode={}&quot;, response.getShortCode());</b>
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;
+&nbsp;        } catch (Exception ex) {
+<b class="fc">&nbsp;            log.error(</b>
+&nbsp;                    &quot;Error creating short URL for longUrl={}&quot;,
+<b class="fc">&nbsp;                    request.getLongUrl(),</b>
+&nbsp;                    ex
+&nbsp;            );
+&nbsp;            throw ex;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{shortCode}&quot;)
+&nbsp;    public RedirectView redirect(@PathVariable String shortCode) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;Redirect request received shortCode={}&quot;, shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            UrlMapping mapping = service.resolve(shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            RedirectView view = new RedirectView(mapping.getLongUrl());</b>
+<b class="fc">&nbsp;            view.setExposeModelAttributes(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(</b>
+&nbsp;                    &quot;Redirect request completed shortCode={} destination={}&quot;,
+&nbsp;                    shortCode,
+<b class="fc">&nbsp;                    mapping.getLongUrl()</b>
+&nbsp;            );
+&nbsp;
+<b class="fc">&nbsp;            return view;</b>
+&nbsp;
+&nbsp;        } catch (Exception ex) {
+<b class="fc">&nbsp;            log.error(</b>
+&nbsp;                    &quot;Error resolving shortCode={}&quot;,
+&nbsp;                    shortCode,
+&nbsp;                    ex
+&nbsp;            );
+&nbsp;            throw ex;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/api/v1/urls/{shortCode}/analytics&quot;)
+&nbsp;    public ResponseEntity&lt;AnalyticsResponse&gt; analytics(@PathVariable String shortCode) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;Analytics request received shortCode={}&quot;, shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            AnalyticsResponse response = service.analytics(shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(</b>
+&nbsp;                    &quot;Analytics request completed shortCode={} clickCount={}&quot;,
+&nbsp;                    shortCode,
+<b class="fc">&nbsp;                    response.getClickCount()</b>
+&nbsp;            );
+&nbsp;
+<b class="fc">&nbsp;            return ResponseEntity.ok(response);</b>
+&nbsp;
+&nbsp;        } catch (Exception ex) {
+<b class="fc">&nbsp;            log.error(</b>
+&nbsp;                    &quot;Error retrieving analytics for shortCode={}&quot;,
+&nbsp;                    shortCode,
+&nbsp;                    ex
+&nbsp;            );
+&nbsp;            throw ex;
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/api/v1/urls/{shortCode}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; delete(@PathVariable String shortCode) {
+&nbsp;        try {
+<b class="fc">&nbsp;            log.info(&quot;Delete request received shortCode={}&quot;, shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            service.delete(shortCode);</b>
+&nbsp;
+<b class="fc">&nbsp;            log.info(&quot;Delete request completed shortCode={}&quot;, shortCode);</b>
+<b class="fc">&nbsp;            return ResponseEntity.noContent().build();</b>
+&nbsp;
+&nbsp;        } catch (Exception ex) {
+<b class="fc">&nbsp;            log.error(</b>
+&nbsp;                    &quot;Error deleting shortCode={}&quot;,
+&nbsp;                    shortCode,
+&nbsp;                    ex
+&nbsp;            );
+&nbsp;            throw ex;
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-09-20 08:38</div>
+</div>
+</body>
+</html>
